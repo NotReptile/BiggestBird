@@ -1,0 +1,34 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp"
+    android:height="100dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+
+    <!-- Fuselage -->
+    <path
+        android:pathData="M20,50 L80,50 L50,10 Z"
+        android:fillColor="#ccc"
+        android:strokeColor="#000"
+        android:strokeWidth="0.1" />
+    <path
+        android:pathData="M30,50 L70,50 L50,20 Z"
+        android:fillColor="#fff"
+        android:strokeColor="#000"
+        android:strokeWidth="0.1" />
+
+    <!-- Wings -->
+    <path
+        android:pathData="M30,55 L70,55 L50,75 Z"
+        android:fillColor="#fff"
+        android:strokeColor="#000"
+        android:strokeWidth="0.1" />
+    <path
+        android:pathData="M35,60 L65,60 L50,75 Z"
+        android:fillColor="#ff0000"
+        android:strokeColor="#000"
+        android:strokeWidth="0.1" />
+
+</vector>
+
+
+
