@@ -1,5 +1,6 @@
-package com.reptile.biggestbird;
+package com.reptile.biggestbird
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -8,9 +9,7 @@ import android.graphics.Rect
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
-import kotlinx.coroutines.delay
-import kotlin.random.Random
-
+import android.webkit.ConsoleMessage
 
 class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback {
 	private val gameThread: GameThread = GameThread(holder, this)
@@ -19,13 +18,14 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
 	private val enemyBullets: MutableList<Bullet> = mutableListOf()
 	private val bullets: MutableList<Bullet> = mutableListOf()
 	private val startButton = Rect()
+	private val upgradeButton = Rect()
 	private var lastSpawnTime: Long = System.currentTimeMillis()
 	private var touchX: Float = 0f
 	private var touchY: Float = 0f
 	private var playerLives: Int = 3
 	private var isGameOver = false
 	private var lastShotTime: Long = 0
-	private val shotDelay: Long = 300
+	private var shotDelay: Long = 300
 	private var isGameStarted = false
 
 	init {
@@ -36,10 +36,8 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
 		super.onSizeChanged(w, h, oldw, oldh)
 		playerPlane.setPosition(w / 2f, h * 0.85f)
 		startButton.set(w / 2 - 200, h / 2 - 100, w / 2 + 200, h / 2 + 100)
+		upgradeButton.set(w / 2 - 200, h / 2 - 100, w / 2 + 200, h / 2 + 100)
 	}
-
-
-
 
 	override fun surfaceCreated(holder: SurfaceHolder) {
 		gameThread.setRunning(true)
@@ -55,11 +53,19 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
 
 	fun update() {
 		// Update game logic here
-		playerPlane.update(touchX, touchY)
-		spawnEnemyPlanes()
-		updateEnemyPlanes()
-		updateBullets()
-		// Add collision detection and scoring logic
+		if (isGameStarted && !isGameOver) {
+			playerPlane.update(touchX, touchY)
+			spawnEnemyPlanes()
+			updateEnemyPlanes()
+			updateBullets()
+
+			val currentTime = System.currentTimeMillis()
+			if (currentTime - lastShotTime > shotDelay) {
+				bullets.add(playerPlane.shoot())
+				lastShotTime = currentTime
+			}
+		}
+
 	}
 	private fun updateBullets() {
 		val playerBulletIterator = bullets.iterator()
@@ -82,24 +88,6 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
 				}
 			}
 		}
-		val enemyBulletIterator = enemyBullets.iterator()
-		while (enemyBulletIterator.hasNext()) {
-			val bullet = enemyBulletIterator.next()
-			bullet.update()
-
-			if (bullet.isOffScreen()) {
-				enemyBulletIterator.remove()
-			}
-
-			// Check for collisions between enemy bullets and the player
-			if (Rect.intersects(bullet.getBounds(), playerPlane.getBounds())) {
-				enemyBulletIterator.remove()
-				playerLives--
-				if (playerLives <= 0) {
-					isGameOver = true
-				}
-			}
-		}
 	}
 
 	private fun updateEnemyPlanes() {
@@ -109,10 +97,6 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
 			enemyPlane.update()
 			if (enemyPlane.isOffScreen(height)) {
 				iterator.remove()
-			}
-			// Enemy plane shooting
-			if (Random.nextInt(100) < 2) {
-				enemyBullets.add(enemyPlane.shoot())
 			}
 			// Check for collisions between enemy planes and the player
 			if (Rect.intersects(enemyPlane.getBounds(), playerPlane.getBounds())) {
@@ -139,6 +123,7 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
 
 		if (!isGameStarted) {
 			drawStartButton(canvas)
+			drawUpgradeButton(canvas)
 		} else {
 			playerPlane.draw(canvas)
 			enemyPlanes.forEach { it.draw(canvas) }
@@ -158,6 +143,14 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
 		canvas.drawText("Start", width / 2f, height / 2f, paint)
 	}
 
+	private fun drawUpgradeButton(canvas: Canvas) {
+		val paint = Paint()
+		paint.color = Color.WHITE
+		paint.textSize = 150f
+		paint.textAlign = Paint.Align.CENTER
+		canvas.drawText("Upgrade", width / 2f, height / 2f + 300, paint)
+	}
+
 	private fun drawGameOver(canvas: Canvas) {
 		val paint = Paint()
 		paint.color = Color.WHITE
@@ -169,6 +162,7 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
 		canvas.drawText("Tap to restart", width / 2f, height / 2f + 100, paint)
 	}
 
+	@SuppressLint("ClickableViewAccessibility")
 	override fun onTouchEvent(event: MotionEvent): Boolean {
 		if (isGameOver) {
 			if (event.action == MotionEvent.ACTION_DOWN) {
@@ -185,13 +179,9 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
 						isGameStarted = true
 						return true
 					}
-
-					if (isGameStarted) {
-						val currentTime = System.currentTimeMillis()
-						if (currentTime - lastShotTime > shotDelay) {
-							bullets.add(playerPlane.shoot())
-							lastShotTime = currentTime
-						}
+					if (!isGameStarted && upgradeButton.contains(touchX.toInt(), touchY.toInt())) {
+						println("Upgraded!")
+						return true
 					}
 
 					return true

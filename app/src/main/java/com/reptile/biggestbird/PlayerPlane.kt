@@ -2,12 +2,9 @@ package com.reptile.biggestbird
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Rect
 import androidx.core.graphics.drawable.toBitmap
-import com.reptile.biggestbird.R
-import kotlinx.coroutines.delay
 
 class PlayerPlane(private val context: Context, x: Float, y: Float) {
 	private val bitmap: Bitmap = context.getDrawable(R.drawable.player_plane)?.toBitmap()!!
@@ -33,7 +30,7 @@ class PlayerPlane(private val context: Context, x: Float, y: Float) {
 		return Rect(x.toInt(), y.toInt(), x.toInt() + bitmap.width, y.toInt() + bitmap.height)
 	}
 	fun shoot(): Bullet {
-		return Bullet(context, x + bitmap.width / 2, y + bitmap.height)
+		return Bullet(context, x + bitmap.width / 2, y - bitmap.height/5)
 	}
 	fun setPosition(x: Float, y: Float) {
 		this.x = x
