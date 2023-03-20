@@ -1,3 +1,3 @@
 # BiggestBird
 Trying to make a game
-Using android studio (kotlin)
+using android studio (kotlin)
