@@ -1,5 +1,6 @@
 package com.reptile.biggestbird
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -7,6 +8,7 @@ import android.graphics.Rect
 import androidx.core.graphics.drawable.toBitmap
 
 class PlayerPlane(private val context: Context, x: Float, y: Float) {
+	@SuppressLint("UseCompatLoadingForDrawables")
 	private val bitmap: Bitmap = context.getDrawable(R.drawable.player_plane)?.toBitmap()!!
 	private val interpolationFactor = 0.2f
 	var x: Float = x

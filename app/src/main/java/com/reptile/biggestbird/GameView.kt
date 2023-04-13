@@ -6,6 +6,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
+import android.util.Log
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
@@ -27,6 +28,7 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
 	private var lastShotTime: Long = 0
 	private var shotDelay: Long = 300
 	private var isGameStarted = false
+	private var score: Long = 0
 
 	init {
 		holder.addCallback(this)
@@ -35,8 +37,8 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
 	override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
 		super.onSizeChanged(w, h, oldw, oldh)
 		playerPlane.setPosition(w / 2f, h * 0.85f)
-		startButton.set(w / 2 - 200, h / 2 - 100, w / 2 + 200, h / 2 + 100)
-		upgradeButton.set(w / 2 - 200, h / 2 - 100, w / 2 + 200, h / 2 + 100)
+		startButton.set(w / 2 - 200, h / 2, w / 2 + 200, h / 2 + 100)
+		upgradeButton.set(w / 2 - 200, h / 2 - 300, w / 2 + 200, h / 2 + 100)
 	}
 
 	override fun surfaceCreated(holder: SurfaceHolder) {
@@ -84,6 +86,7 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
 				if (Rect.intersects(bullet.getBounds(), enemyPlane.getBounds())) {
 					playerBulletIterator.remove()
 					enemyPlaneIterator.remove()
+					score ++
 					break
 				}
 			}
@@ -120,7 +123,10 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
 	override fun draw(canvas: Canvas) {
 		super.draw(canvas)
 		canvas.drawColor(Color.GRAY)
-
+		val paint = Paint()
+		paint.color = Color.WHITE
+		paint.textSize = 150f
+		paint.textAlign = Paint.Align.CENTER
 		if (!isGameStarted) {
 			drawStartButton(canvas)
 			drawUpgradeButton(canvas)
@@ -128,8 +134,8 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
 			playerPlane.draw(canvas)
 			enemyPlanes.forEach { it.draw(canvas) }
 			bullets.forEach { it.draw(canvas) }
+			canvas.drawText("Score:$score",width / 2f, height - 10f, paint)
 		}
-
 		if (isGameOver) {
 			drawGameOver(canvas)
 		}
@@ -148,7 +154,7 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
 		paint.color = Color.WHITE
 		paint.textSize = 150f
 		paint.textAlign = Paint.Align.CENTER
-		canvas.drawText("Upgrade", width / 2f, height / 2f + 300, paint)
+		canvas.drawText("Upgrade", width / 2f, height / 2f + 300f, paint)
 	}
 
 	private fun drawGameOver(canvas: Canvas) {
@@ -180,7 +186,7 @@ class GameView(context: Context) : SurfaceView(context), SurfaceHolder.Callback 
 						return true
 					}
 					if (!isGameStarted && upgradeButton.contains(touchX.toInt(), touchY.toInt())) {
-						println("Upgraded!")
+						isGameStarted = true
 						return true
 					}
 
